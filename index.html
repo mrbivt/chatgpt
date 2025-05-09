@@ -1,0 +1,49 @@
+<div style="max-width: 500px; margin: auto; font-family: sans-serif;">
+  <h2>🤖 ChatGPT GPT-4o Bot</h2>
+  <div id="chat" style="height: 300px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;"></div>
+  <input id="input" type="text" placeholder="Nhập câu hỏi..." style="width: 100%; padding: 8px;" />
+  <button onclick="sendMessage()" style="width: 100%; padding: 10px; margin-top: 5px;">Gửi</button>
+</div>
+
+<script>
+  const chatDiv = document.getElementById("chat");
+
+  async function sendMessage() {
+    const input = document.getElementById("input");
+    const userMessage = input.value.trim();
+    if (!userMessage) return;
+
+    chatDiv.innerHTML += `<p><strong>Bạn:</strong> ${userMessage}</p>`;
+    chatDiv.scrollTop = chatDiv.scrollHeight;
+    input.value = "";
+
+    try {
+      const res = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer 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" // 🔁 THAY bằng API key của bạn
+        },
+        body: JSON.stringify({
+          model: "gpt-4o",
+          messages: [{ role: "user", content: userMessage }]
+        })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        console.error("Lỗi API:", data);
+        chatDiv.innerHTML += `<p><strong>Bot:</strong> ❌ Lỗi: ${data.error?.message || "Không rõ nguyên nhân."}</p>`;
+        return;
+      }
+
+      const reply = data.choices?.[0]?.message?.content || "❌ Bot không có phản hồi.";
+      chatDiv.innerHTML += `<p><strong>Bot:</strong> ${reply}</p>`;
+      chatDiv.scrollTop = chatDiv.scrollHeight;
+    } catch (err) {
+      console.error("Lỗi khi gọi API:", err);
+      chatDiv.innerHTML += `<p><strong>Bot:</strong> ❌ Đã xảy ra lỗi khi gửi yêu cầu.</p>`;
+    }
+  }
+</script>
