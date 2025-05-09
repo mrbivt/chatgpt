@@ -10,29 +10,40 @@
 
   async function sendMessage() {
     const input = document.getElementById("input");
-    const userMessage = input.value;
+    const userMessage = input.value.trim();
     if (!userMessage) return;
 
     chatDiv.innerHTML += `<p><strong>Bạn:</strong> ${userMessage}</p>`;
     chatDiv.scrollTop = chatDiv.scrollHeight;
     input.value = "";
 
-    const res = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer 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" // 🔁 THAY bằng API key của bạn
-      },
-      body: JSON.stringify({
-        model: "gpt-4o", // ✅ Dùng GPT-4o
-        messages: [{ role: "user", content: userMessage }]
-      })
-    });
+    try {
+      const res = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer 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" // 🔁 THAY bằng API key của bạn
+        },
+        body: JSON.stringify({
+          model: "gpt-4o",
+          messages: [{ role: "user", content: userMessage }]
+        })
+      });
 
-    const data = await res.json();
-    const reply = data.choices?.[0]?.message?.content || "Bot không trả lời được.";
+      const data = await res.json();
 
-    chatDiv.innerHTML += `<p><strong>Bot:</strong> ${reply}</p>`;
-    chatDiv.scrollTop = chatDiv.scrollHeight;
+      if (!res.ok) {
+        console.error("Lỗi API:", data);
+        chatDiv.innerHTML += `<p><strong>Bot:</strong> ❌ Lỗi: ${data.error?.message || "Không rõ nguyên nhân."}</p>`;
+        return;
+      }
+
+      const reply = data.choices?.[0]?.message?.content || "❌ Bot không có phản hồi.";
+      chatDiv.innerHTML += `<p><strong>Bot:</strong> ${reply}</p>`;
+      chatDiv.scrollTop = chatDiv.scrollHeight;
+    } catch (err) {
+      console.error("Lỗi khi gọi API:", err);
+      chatDiv.innerHTML += `<p><strong>Bot:</strong> ❌ Đã xảy ra lỗi khi gửi yêu cầu.</p>`;
+    }
   }
 </script>
