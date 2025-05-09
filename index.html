@@ -26,7 +26,7 @@
         chatbox.innerHTML += `<p><b>Bạn:</b> ${question}</p>`;
         input.value = "";
 
-        const response = await fetch("https://api.openai.com/v1/chat/completions", {
+        const response = await fetch("https://gpt-proxy.mrbivt1993.workers.dev/", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
